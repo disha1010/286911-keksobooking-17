@@ -1,3 +1,5 @@
+'use strict';
+
 var ITEMS_COUNT = 8;
 var OFFER_TYPES = [
   'palace',
@@ -30,7 +32,7 @@ var getRandomValue = function (dataList) {
 
 var getPinLocation = function (min, max) {
   return Math.floor(Math.random() * (max - min) + min);
-}
+};
 
 var createMapElement = function (element) {
   var mapElement = pinTemplate.cloneNode(true);
@@ -39,7 +41,7 @@ var createMapElement = function (element) {
   mapElement.querySelector('img').alt = element.offer.type;
 
   return mapElement;
-}
+};
 
 var createMapFragment = function (fragment) {
   var mapFragment = document.createDocumentFragment();
@@ -49,13 +51,13 @@ var createMapFragment = function (fragment) {
   }
 
   return mapFragment;
-}
+};
 
 map.classList.remove('map--faded');
 
 for (var i = 0; i < ITEMS_COUNT; i++) {
   var imgUrl = 'img/avatars/user0' + (i + 1) + '.png';
-  
+
   var newItem = {
     author: {
       avatar: imgUrl
@@ -67,8 +69,8 @@ for (var i = 0; i < ITEMS_COUNT; i++) {
       x: getPinLocation(xMin, xMax),
       y: getPinLocation(yMin, yMax)
     }
-  }
-  
+  };
+
   mapItems.push(newItem);
 }
 
