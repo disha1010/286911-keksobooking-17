@@ -47,7 +47,7 @@ var createMapFragment = function (fragment) {
   var mapFragment = document.createDocumentFragment();
 
   for (var i = 0; i < fragment.length; i++) {
-    mapFragment.appendChild(createMapElement(fragment[i]))
+    mapFragment.appendChild(createMapElement(fragment[i]));
   }
 
   return mapFragment;
