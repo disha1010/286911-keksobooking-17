@@ -1,6 +1,10 @@
 'use strict';
 
 var ITEMS_COUNT = 8;
+var PIN_WIDTH = 50;
+var PIN_HEIGHT = 70;
+var PIN_Y_MIN = 130;
+var PIN_Y_MAX = 630;
 var OFFER_TYPES = [
   'palace',
   'flat',
@@ -9,21 +13,15 @@ var OFFER_TYPES = [
 ];
 
 var mapItems = [];
-
-var map = document.querySelector('.map');
-
+var adMap = document.querySelector('.map');
 var pinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
 var mapPins = document.querySelector('.map__pins');
+var mapViewportOffset = adMap.getBoundingClientRect();
 
-var mapViewportOffset = map.getBoundingClientRect();
-var pinWidth = 50;
-var pinHeight = 70;
-
-var xMax = mapViewportOffset.right - mapViewportOffset.left - pinWidth;
+var xMax = mapViewportOffset.right - mapViewportOffset.left - PIN_WIDTH;
 var xMin = 0;
-
-var yMax = 630 - pinHeight;
-var yMin = 130;
+var yMax = PIN_Y_MAX - PIN_HEIGHT;
+var yMin = PIN_Y_MIN;
 
 var getRandomValue = function (dataList) {
   var randValueIndex = Math.floor(Math.random() * dataList.length);
@@ -34,26 +32,27 @@ var getPinLocation = function (min, max) {
   return Math.floor(Math.random() * (max - min) + min);
 };
 
-var createMapElement = function (element) {
+var createMapElement = function (elementData) {
   var mapElement = pinTemplate.cloneNode(true);
-  mapElement.style = 'left:' + element.location.x + 'px; top:' + element.location.y + 'px';
-  mapElement.querySelector('img').src = element.author.avatar;
-  mapElement.querySelector('img').alt = element.offer.type;
+  var pinImg = mapElement.querySelector('img');
+  mapElement.style = 'left:' + elementData.location.x + 'px; top:' + elementData.location.y + 'px';
+  pinImg.src = elementData.author.avatar;
+  pinImg.alt = elementData.offer.type;
 
   return mapElement;
 };
 
-var createMapFragment = function (fragment) {
+var createMapFragment = function (dataList) {
   var mapFragment = document.createDocumentFragment();
 
-  for (var i = 0; i < fragment.length; i++) {
-    mapFragment.appendChild(createMapElement(fragment[i]));
+  for (var i = 0; i < dataList.length; i++) {
+    mapFragment.appendChild(createMapElement(dataList[i]));
   }
 
   return mapFragment;
 };
 
-map.classList.remove('map--faded');
+adMap.classList.remove('map--faded');
 
 for (var i = 0; i < ITEMS_COUNT; i++) {
   var imgUrl = 'img/avatars/user0' + (i + 1) + '.png';
