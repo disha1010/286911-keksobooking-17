@@ -12,7 +12,6 @@ var OFFER_TYPES = [
   'bungalo'
 ];
 
-var mapItems = [];
 var adMap = document.querySelector('.map');
 var pinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
 var mapPins = document.querySelector('.map__pins');
@@ -81,5 +80,5 @@ var getMapItems = function (itemsCount) {
 
 adMap.classList.remove('map--faded');
 
-mapItems = getMapItems(ITEMS_COUNT);
+var mapItems = getMapItems(ITEMS_COUNT);
 mapPins.appendChild(createMapFragment(mapItems));
