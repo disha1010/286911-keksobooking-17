@@ -25,6 +25,7 @@ var yMin = PIN_Y_MIN;
 
 var getRandomValue = function (dataList) {
   var randValueIndex = Math.floor(Math.random() * dataList.length);
+
   return dataList[randValueIndex];
 };
 
@@ -35,6 +36,7 @@ var getPinLocation = function (min, max) {
 var createMapElement = function (elementData) {
   var mapElement = pinTemplate.cloneNode(true);
   var pinImg = mapElement.querySelector('img');
+
   mapElement.style = 'left:' + elementData.location.x + 'px; top:' + elementData.location.y + 'px';
   pinImg.src = elementData.author.avatar;
   pinImg.alt = elementData.offer.type;
@@ -52,25 +54,32 @@ var createMapFragment = function (dataList) {
   return mapFragment;
 };
 
+var getMapItems = function (itemsCount) {
+  var newMapItems = [];
+
+  for (var i = 0; i < itemsCount; i++) {
+    var imgUrl = 'img/avatars/user0' + (i + 1) + '.png';
+
+    var newItem = {
+      author: {
+        avatar: imgUrl
+      },
+      offer: {
+        type: getRandomValue(OFFER_TYPES)
+      },
+      location: {
+        x: getPinLocation(xMin, xMax),
+        y: getPinLocation(yMin, yMax)
+      }
+    };
+
+    newMapItems.push(newItem);
+  }
+
+  return newMapItems;
+};
+
 adMap.classList.remove('map--faded');
 
-for (var i = 0; i < ITEMS_COUNT; i++) {
-  var imgUrl = 'img/avatars/user0' + (i + 1) + '.png';
-
-  var newItem = {
-    author: {
-      avatar: imgUrl
-    },
-    offer: {
-      type: getRandomValue(OFFER_TYPES)
-    },
-    location: {
-      x: getPinLocation(xMin, xMax),
-      y: getPinLocation(yMin, yMax)
-    }
-  };
-
-  mapItems.push(newItem);
-}
-
+mapItems = getMapItems(ITEMS_COUNT);
 mapPins.appendChild(createMapFragment(mapItems));
