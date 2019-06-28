@@ -30,6 +30,14 @@ var xMin = 0;
 var yMax = PIN_Y_MAX - PIN_HEIGHT;
 var yMin = PIN_Y_MIN;
 
+var housingPrice = adForm.querySelector('#price');
+var housingType = adForm.querySelector('#type');
+var housingTypeOptions = housingType.querySelectorAll('option');
+var timein = adForm.querySelector('#timein');
+var timeinOptions = timein.querySelectorAll('option');
+var timeout = adForm.querySelector('#timeout');
+var timeoutOptions = timeout.querySelectorAll('option');
+
 var getRandomValue = function (dataList) {
   var randValueIndex = Math.floor(Math.random() * dataList.length);
 
@@ -111,6 +119,36 @@ var activateElements = function () {
   mapPins.appendChild(createMapFragment(mapItems));
 };
 
+// нахождение минимальной цены за ночь
+var getMinPriceByHousingType = function () {
+  var housingPrices = {
+    bungalo: 0,
+    flat: 1000,
+    house: 5000,
+    palace: 10000
+  };
+
+  for (var i = 0; i < housingTypeOptions.length; i++) {
+    var selectedTypeOption = housingTypeOptions[i].selected;
+    var typeOptionValue = housingPrices[housingTypeOptions[i].value];
+    if (selectedTypeOption) {
+      housingPrice.min = typeOptionValue;
+      housingPrice.placeholder = typeOptionValue;
+    }
+  }
+};
+
+// синхронизация времени заезда и выезда
+var timeSynchronization = function (mainTime, dependentTime) {
+  for (var i = 0; i < mainTime.length; i++) {
+    var selectedTimeOption = mainTime[i].selected;
+    var dependentTimeOption = dependentTime[i];
+    if (selectedTimeOption) {
+      dependentTimeOption.selected = true;
+    }
+  }
+};
+
 disableFormElements();
 
 mainPinAddress.value = getMainPinLocation();
@@ -121,4 +159,14 @@ mainPin.addEventListener('click', function () {
 
 mainPin.addEventListener('mouseup', function () {
   mainPinAddress.value = getMainPinLocation();
+});
+
+housingType.addEventListener('change', getMinPriceByHousingType);
+
+timein.addEventListener('change', function () {
+  timeSynchronization(timeinOptions, timeoutOptions);
+});
+
+timeout.addEventListener('change', function () {
+  timeSynchronization(timeoutOptions, timeinOptions);
 });
