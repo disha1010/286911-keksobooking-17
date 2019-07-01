@@ -34,9 +34,7 @@ var housingPrice = adForm.querySelector('#price');
 var housingType = adForm.querySelector('#type');
 var housingTypeOptions = housingType.querySelectorAll('option');
 var timein = adForm.querySelector('#timein');
-var timeinOptions = timein.querySelectorAll('option');
 var timeout = adForm.querySelector('#timeout');
-var timeoutOptions = timeout.querySelectorAll('option');
 
 var getRandomValue = function (dataList) {
   var randValueIndex = Math.floor(Math.random() * dataList.length);
