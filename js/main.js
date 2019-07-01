@@ -140,13 +140,7 @@ var getMinPriceByHousingType = function () {
 
 // синхронизация времени заезда и выезда
 var timeSynchronization = function (mainTime, dependentTime) {
-  for (var i = 0; i < mainTime.length; i++) {
-    var selectedTimeOption = mainTime[i].selected;
-    var dependentTimeOption = dependentTime[i];
-    if (selectedTimeOption) {
-      dependentTimeOption.selected = true;
-    }
-  }
+  dependentTime.value = mainTime.value;
 };
 
 disableFormElements();
@@ -164,9 +158,9 @@ mainPin.addEventListener('mouseup', function () {
 housingType.addEventListener('change', getMinPriceByHousingType);
 
 timein.addEventListener('change', function () {
-  timeSynchronization(timeinOptions, timeoutOptions);
+  timeSynchronization(timein, timeout);
 });
 
 timeout.addEventListener('change', function () {
-  timeSynchronization(timeoutOptions, timeinOptions);
+  timeSynchronization(timeout, timein);
 });
