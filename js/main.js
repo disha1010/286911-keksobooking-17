@@ -15,17 +15,14 @@ var OFFER_TYPES = [
 var adMap = document.querySelector('.map');
 var pinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
 var mapPins = document.querySelector('.map__pins');
-var mapViewportOffset = adMap.getBoundingClientRect();
 
 var mainPin = mapPins.querySelector('.map__pin--main');
 var adNoties = document.querySelector('.notice');
 var adForm = adNoties.querySelector('.ad-form');
 var adFormFields = document.querySelectorAll('fieldset');
-
 var mainPinAddress = adForm.querySelector('#address');
-var mainPinViewportOffset = mainPin.getBoundingClientRect();
 
-var xMax = mapViewportOffset.right - mapViewportOffset.left - PIN_WIDTH;
+var xMax = adMap.offsetLeft + adMap.offsetWidth - adMap.offsetLeft - PIN_WIDTH;
 var xMin = 0;
 var yMax = PIN_Y_MAX - PIN_HEIGHT;
 var yMin = PIN_Y_MIN;
@@ -36,6 +33,8 @@ var housingTypeOptions = housingType.querySelectorAll('option');
 var timein = adForm.querySelector('#timein');
 var timeout = adForm.querySelector('#timeout');
 
+var isActive = false;
+
 var getRandomValue = function (dataList) {
   var randValueIndex = Math.floor(Math.random() * dataList.length);
 
@@ -43,7 +42,7 @@ var getRandomValue = function (dataList) {
 };
 
 var getPinLocation = function (min, max) {
-  return Math.random() * (max - min) + min;
+  return Math.floor(Math.random() * (max - min) + min);
 };
 
 var createMapElement = function (elementData) {
@@ -92,20 +91,23 @@ var getMapItems = function (itemsCount) {
   return newMapItems;
 };
 
-// нахождение значения поля адреса
-var getMainPinLocation = function () {
-  return mainPinViewportOffset.left + mainPinViewportOffset.width / 2 - mapViewportOffset.left;
-};
-
 // блокировка элементов формы ввода
 var disableFormElements = function () {
   for (var i = 0; i < adFormFields.length; i++) {
     adFormFields[i].setAttribute('disabled', 'disabled');
   }
+
+  // значение в поле Адреса
+  mainPinAddress.value = mainPin.offsetLeft + mainPin.offsetWidth / 2;
 };
 
 // aктивация форм и карты
 var activateElements = function () {
+  if (isActive) {
+    return;
+  }
+  isActive = true;
+
   for (var i = 0; i < adFormFields.length; i++) {
     adFormFields[i].removeAttribute('disabled');
   }
@@ -143,16 +145,6 @@ var timeSynchronization = function (mainTime, dependentTime) {
 
 disableFormElements();
 
-mainPinAddress.value = getMainPinLocation();
-
-mainPin.addEventListener('click', function () {
-  activateElements();
-});
-
-mainPin.addEventListener('mouseup', function () {
-  mainPinAddress.value = getMainPinLocation();
-});
-
 housingType.addEventListener('change', getMinPriceByHousingType);
 
 timein.addEventListener('change', function () {
@@ -161,4 +153,76 @@ timein.addEventListener('change', function () {
 
 timeout.addEventListener('change', function () {
   timeSynchronization(timeout, timein);
+});
+
+var limits = {
+  left: xMin,
+  right: adMap.offsetWidth - mainPin.offsetWidth,
+  bottom: PIN_Y_MAX,
+  top: PIN_Y_MIN
+};
+
+// перетаскивание
+mainPin.addEventListener('mousedown', function (evt) {
+  evt.preventDefault();
+
+  activateElements();
+
+  var dragged = true;
+
+  var startCoords = {
+    x: evt.clientX,
+    y: evt.clientY
+  };
+
+  var getMainPinCoords = function (pinMoveEvt) {
+    var shift = {
+      x: startCoords.x - pinMoveEvt.clientX,
+      y: startCoords.y - pinMoveEvt.clientY
+    };
+
+    startCoords = {
+      x: pinMoveEvt.clientX,
+      y: pinMoveEvt.clientY
+    };
+
+    if (dragged) {
+      var newLocation = {
+        x: mainPin.offsetLeft - shift.x,
+        y: mainPin.offsetTop - shift.y
+      };
+
+      if (pinMoveEvt.clientX - adMap.offsetLeft > limits.right) {
+        newLocation.x = limits.right;
+      } else if (pinMoveEvt.clientX - adMap.offsetLeft < limits.left) {
+        newLocation.x = limits.left;
+      } else if (pinMoveEvt.clientY > limits.bottom) {
+        newLocation.y = limits.bottom;
+      } else if (pinMoveEvt.clientY < limits.top) {
+        newLocation.y = limits.top;
+      }
+
+      mainPin.style.left = newLocation.x + 'px';
+      mainPin.style.top = newLocation.y + 'px';
+    }
+    // значение в поле Адреса
+    mainPinAddress.value = mainPin.offsetLeft + mainPin.offsetWidth / 2;
+  };
+
+  var onMouseMove = function (moveEvt) {
+    moveEvt.preventDefault();
+    getMainPinCoords(moveEvt);
+  };
+
+  var onMouseUp = function (upEvt) {
+    upEvt.preventDefault();
+    getMainPinCoords(upEvt);
+    dragged = false;
+
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  };
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
 });
