@@ -1,17 +1,10 @@
 'use strict';
 
 (function () {
-  var ITEMS_COUNT = 8;
   var PIN_WIDTH = 50;
   var PIN_HEIGHT = 70;
   var PIN_Y_MIN = 130;
   var PIN_Y_MAX = 630;
-  var OFFER_TYPES = [
-    'palace',
-    'flat',
-    'house',
-    'bungalo'
-  ];
 
   var adMap = document.querySelector('.map');
   var pinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
@@ -21,16 +14,18 @@
   var adFormFields = document.querySelectorAll('fieldset');
   var mainPinAddress = window.adForm.querySelector('#address');
 
-  var xMax = adMap.offsetLeft + adMap.offsetWidth - adMap.offsetLeft - PIN_WIDTH;
+  var errorTemplate = document.querySelector('#error').content.querySelector('.error');
+  var mainWrapper = document.querySelector('main');
   var xMin = 0;
-  var yMax = PIN_Y_MAX - PIN_HEIGHT;
-  var yMin = PIN_Y_MIN;
 
   var createMapElement = function (elementData) {
     var mapElement = pinTemplate.cloneNode(true);
     var pinImg = mapElement.querySelector('img');
 
-    mapElement.style = 'left:' + elementData.location.x + 'px; top:' + elementData.location.y + 'px';
+    var locationX = elementData.location.x - PIN_WIDTH;
+    var locationY = elementData.location.y - PIN_HEIGHT;
+
+    mapElement.style = 'left:' + locationX + 'px; top:' + locationY + 'px';
     pinImg.src = elementData.author.avatar;
     pinImg.alt = elementData.offer.type;
 
@@ -47,31 +42,6 @@
     return mapFragment;
   };
 
-  var getMapItems = function (itemsCount) {
-    var newMapItems = [];
-
-    for (var i = 0; i < itemsCount; i++) {
-      var imgUrl = 'img/avatars/user0' + (i + 1) + '.png';
-
-      var newItem = {
-        author: {
-          avatar: imgUrl
-        },
-        offer: {
-          type: window.util.getRandomValue(OFFER_TYPES)
-        },
-        location: {
-          x: window.util.getPinLocation(xMin, xMax),
-          y: window.util.getPinLocation(yMin, yMax)
-        }
-      };
-
-      newMapItems.push(newItem);
-    }
-
-    return newMapItems;
-  };
-
   // блокировка элементов формы ввода
   var disableFormElements = function () {
     for (var i = 0; i < adFormFields.length; i++) {
@@ -82,14 +52,33 @@
     mainPinAddress.value = mainPin.offsetLeft + mainPin.offsetWidth / 2;
   };
 
+  var createErrorMessage = function () {
+    var error = errorTemplate.cloneNode(true);
+    var errorFragment = document.createDocumentFragment();
+
+    errorFragment.appendChild(error);
+
+    return errorFragment;
+  };
+
   // aктивация форм и карты
   var isActive = false;
+
+  var onLoad = function (mapItems) {
+    mapPins.appendChild(createMapFragment(mapItems));
+  };
+
+  var onError = function (message) {
+    mainWrapper.appendChild(createErrorMessage());
+
+    var errorMessage = document.querySelector('.error__message');
+    errorMessage.textContent = message;
+  };
 
   var activateElements = function () {
     if (isActive) {
       return;
     }
-
     isActive = true;
 
     for (var i = 0; i < adFormFields.length; i++) {
@@ -99,8 +88,7 @@
     adMap.classList.remove('map--faded');
     window.adForm.classList.remove('ad-form--disabled');
 
-    var mapItems = getMapItems(ITEMS_COUNT);
-    mapPins.appendChild(createMapFragment(mapItems));
+    window.backend.load(onLoad, onError);
   };
 
   disableFormElements();
