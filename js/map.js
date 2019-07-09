@@ -53,6 +53,7 @@
       })
       : pins;
     window.render.pins(sameHousingType);
+    window.render.adCard(sameHousingType);
   };
 
   var onLoad = function (data) {
