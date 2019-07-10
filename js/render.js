@@ -4,6 +4,8 @@
   var PIN_WIDTH = 50;
   var PIN_HEIGHT = 70;
 
+  var ESC_KEY = 'Escape';
+
   var adMap = document.querySelector('.map');
 
   var pinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
@@ -15,22 +17,24 @@
   var mapCardTemplate = document.querySelector('#card').content.querySelector('.map__card');
   var mapFilterContainer = document.querySelector('.map__filters-container');
 
-  var createMapElement = function (data) {
+  var createMapElement = function (data, index) {
     var mapElement = pinTemplate.cloneNode(true);
     var pinImg = mapElement.querySelector('img');
 
     var locationX = data.location.x - PIN_WIDTH;
     var locationY = data.location.y - PIN_HEIGHT;
 
-    mapElement.style = 'left:' + locationX + 'px; top:' + locationY + 'px';
     mapElement.classList.add('map__pin--ads');
+    mapElement.setAttribute('data-index', index);
+
+    mapElement.style = 'left:' + locationX + 'px; top:' + locationY + 'px';
     pinImg.src = data.author.avatar;
     pinImg.alt = data.offer.type;
 
     return mapElement;
   };
 
-  var getAdCardInfo = function (data) {
+  var getAdOffer = function (offerData) {
     var mapCard = mapCardTemplate.cloneNode(true);
 
     var offerAvatar = mapCard.querySelector('.popup__avatar');
@@ -43,7 +47,7 @@
     var offerFeatures = mapCard.querySelector('.popup__features');
     var offerDescription = mapCard.querySelector('.popup__description');
     var offerPhotos = mapCard.querySelector('.popup__photos');
-    var offerImgSrcs = data.offer.photos || [];
+    var offerImgSrcs = offerData.offer.photos || [];
 
     var housingType = {
       flat: 'Квартира',
@@ -52,15 +56,15 @@
       palace: 'Дворец'
     };
 
-    offerTitle.innerHTML = data.offer.title;
-    offerAddress.innerHTML = data.offer.address;
-    offerPrice.innerHTML = data.offer.price + '₽/ночь';
-    offerType.innerHTML = housingType[data.offer.type];
-    offerRoomsAndGuests.innerHTML = data.offer.rooms + ' комнаты для ' + data.offer.rooms + ' гостей';
-    offerTime.innerHTML = 'Заезд после ' + data.offer.checkin + ', выезд до ' + data.offer.checkout;
-    offerFeatures.innerHTML = data.offer.features;
-    offerDescription.innerHTML = data.offer.description;
-    offerAvatar.src = data.author.avatar;
+    offerTitle.innerHTML = offerData.offer.title;
+    offerAddress.innerHTML = offerData.offer.address;
+    offerPrice.innerHTML = offerData.offer.price + '₽/ночь';
+    offerType.innerHTML = housingType[offerData.offer.type];
+    offerRoomsAndGuests.innerHTML = offerData.offer.rooms + ' комнаты для ' + offerData.offer.rooms + ' гостей';
+    offerTime.innerHTML = 'Заезд после ' + offerData.offer.checkin + ', выезд до ' + offerData.offer.checkout;
+    offerFeatures.innerHTML = offerData.offer.features;
+    offerDescription.innerHTML = offerData.offer.description;
+    offerAvatar.src = offerData.author.avatar;
 
     offerImgSrcs.forEach(function (src) {
       var offerImg = document.createElement('img');
@@ -86,12 +90,13 @@
           p.parentElement.removeChild(p);
         });
       }
+
       // add new pins
       var mapFragment = document.createDocumentFragment();
       var takeNumber = data.length > 5 ? 5 : data.length;
 
       for (var i = 0; i < takeNumber; i++) {
-        mapFragment.appendChild(createMapElement(data[i]));
+        mapFragment.appendChild(createMapElement(data[i], i));
       }
 
       mapPins.appendChild(mapFragment);
@@ -105,13 +110,32 @@
     },
     adCard: function (data) {
       var mapCardFragment = document.createDocumentFragment();
-      var takeNumber = data.length > 5 ? 5 : data.length;
+      var pins = mapPins.querySelectorAll('.map__pin--ads');
 
-      for (var i = 0; i < takeNumber; i++) {
-        mapCardFragment.appendChild(getAdCardInfo(data[i]));
-      }
+      pins.forEach(function (pin) {
+        pin.addEventListener('click', function () {
+          var offerCard = mapCardFragment.appendChild(getAdOffer(data[pin.dataset.index]));
+          var offerClose = offerCard.querySelector('.popup__close');
 
-      adMap.insertBefore(mapCardFragment, mapFilterContainer);
+          var onPopupEscPress = function (evt) {
+            if (evt.key === ESC_KEY) {
+              closePopup();
+            }
+          };
+
+          var closePopup = function () {
+            offerCard.classList.add('hidden');
+            document.removeEventListener('keydown', onPopupEscPress);
+          };
+
+          adMap.appendChild(offerCard, mapFilterContainer);
+          document.addEventListener('keydown', onPopupEscPress);
+
+          offerClose.addEventListener('click', function () {
+            closePopup();
+          });
+        });
+      });
     }
   };
 })();
