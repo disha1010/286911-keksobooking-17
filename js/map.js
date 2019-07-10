@@ -5,6 +5,7 @@
   var PIN_Y_MAX = 630;
 
   var adMap = document.querySelector('.map');
+  // var adForm = document.querySelector('.ad-form--disabled');
 
   var mainPin = document.querySelector('.map__pin--main');
   var adFormFields = document.querySelectorAll('fieldset');
@@ -41,7 +42,9 @@
       adFormFields[i].removeAttribute('disabled');
     }
 
+    window.adForm.classList.remove('ad-form--disabled');
     adMap.classList.remove('map--faded');
+
     updatePins();
   };
 
@@ -73,6 +76,11 @@
     updatePins();
   });
 
+  var Coordinate = function (x, y) {
+    this.x = x;
+    this.y = y;
+  };
+
   // перетаскивание
   var isDrag = false;
   mainPin.addEventListener('mousedown', function (evt) {
@@ -88,26 +96,14 @@
       top: PIN_Y_MIN
     };
 
-    var startCoords = {
-      x: evt.clientX,
-      y: evt.clientY
-    };
+    var startCoords = new Coordinate(evt.clientX, evt.clientY);
 
     var getMainPinCoords = function (pinMoveEvt) {
-      var shift = {
-        x: startCoords.x - pinMoveEvt.clientX,
-        y: startCoords.y - pinMoveEvt.clientY
-      };
+      var shift = new Coordinate(startCoords.x - pinMoveEvt.clientX, startCoords.y - pinMoveEvt.clientY);
 
-      startCoords = {
-        x: pinMoveEvt.clientX,
-        y: pinMoveEvt.clientY
-      };
+      startCoords = new Coordinate(pinMoveEvt.clientX, pinMoveEvt.clientY);
 
-      var newLocation = {
-        x: mainPin.offsetLeft - shift.x,
-        y: mainPin.offsetTop - shift.y
-      };
+      var newLocation = new Coordinate(mainPin.offsetLeft - shift.x, mainPin.offsetTop - shift.y);
 
       if (isDrag) {
         if (pinMoveEvt.clientX - adMap.offsetLeft > limits.right) {
