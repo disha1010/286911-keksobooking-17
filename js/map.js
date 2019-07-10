@@ -42,7 +42,6 @@
     }
 
     adMap.classList.remove('map--faded');
-    window.adForm.classList.remove('ad-form--disabled');
     updatePins();
   };
 
@@ -149,3 +148,4 @@
     document.addEventListener('mouseup', onMouseUp);
   });
 })();
+
