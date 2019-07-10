@@ -33,6 +33,7 @@
   var getAdCardInfo = function (data) {
     var mapCard = mapCardTemplate.cloneNode(true);
 
+    var offerAvatar = mapCard.querySelector('.popup__avatar');
     var offerTitle = mapCard.querySelector('.popup__title');
     var offerAddress = mapCard.querySelector('.popup__text--address');
     var offerPrice = mapCard.querySelector('.popup__text--price');
@@ -59,6 +60,7 @@
     offerTime.innerHTML = 'Заезд после ' + data.offer.checkin + ', выезд до ' + data.offer.checkout;
     offerFeatures.innerHTML = data.offer.features;
     offerDescription.innerHTML = data.offer.description;
+    offerAvatar.src = data.author.avatar;
 
     offerImgSrcs.forEach(function (src) {
       var offerImg = document.createElement('img');
