@@ -43,13 +43,14 @@
     timeSynchronization(timeout, timein);
   });
 
+  // add capacity option by rooms
   roomNumber.addEventListener('change', function (evt) {
     evt.preventDefault();
-    var room = roomNumber.value;
+    var room = +roomNumber.value;
     var capacityOption;
     capacity.innerHTML = '';
 
-    if (room > 3) {
+    if (room === 100) {
       capacityOption = document.createElement('option');
       capacity.value = 0;
       capacityOption.innerHTML = 'не для гостей';

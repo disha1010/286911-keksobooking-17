@@ -96,23 +96,25 @@
       top: PIN_Y_MIN
     };
 
-    var startCoords = new Coordinate(evt.clientX, evt.clientY);
+    var startCoords = new Coordinate(evt.clientX, evt.clientY + window.scrollY);
 
-    var getMainPinCoords = function (pinMoveEvt) {
-      var shift = new Coordinate(startCoords.x - pinMoveEvt.clientX, startCoords.y - pinMoveEvt.clientY);
+    var setMainPinCoords = function (pinMoveEvt) {
+      var newMouseCoords = new Coordinate(pinMoveEvt.clientX, pinMoveEvt.clientY + window.scrollY);
+      var shift = new Coordinate(startCoords.x - newMouseCoords.x, startCoords.y - newMouseCoords.y);
 
-      startCoords = new Coordinate(pinMoveEvt.clientX, pinMoveEvt.clientY);
+      startCoords = newMouseCoords;
 
       var newLocation = new Coordinate(mainPin.offsetLeft - shift.x, mainPin.offsetTop - shift.y);
 
       if (isDrag) {
-        if (pinMoveEvt.clientX - adMap.offsetLeft > limits.right) {
+        if (newMouseCoords.x - adMap.offsetLeft > limits.right) {
           newLocation.x = limits.right;
-        } else if (pinMoveEvt.clientX - adMap.offsetLeft < limits.left) {
+        } else if (newMouseCoords.x - adMap.offsetLeft < limits.left) {
           newLocation.x = limits.left;
-        } else if (pinMoveEvt.clientY > limits.bottom) {
+        }
+        if (newMouseCoords.y > limits.bottom) {
           newLocation.y = limits.bottom;
-        } else if (pinMoveEvt.clientY < limits.top) {
+        } else if (newMouseCoords.y < limits.top) {
           newLocation.y = limits.top;
         }
 
@@ -128,12 +130,12 @@
 
     var onMouseMove = function (moveEvt) {
       moveEvt.preventDefault();
-      getMainPinCoords(moveEvt);
+      setMainPinCoords(moveEvt);
     };
 
     var onMouseUp = function (upEvt) {
       upEvt.preventDefault();
-      getMainPinCoords(upEvt);
+      setMainPinCoords(upEvt);
       isDrag = false;
 
       document.removeEventListener('mousemove', onMouseMove);
