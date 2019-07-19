@@ -5,11 +5,11 @@
   var PIN_Y_MAX = 630;
 
   var adMap = document.querySelector('.map');
-  // var adForm = document.querySelector('.ad-form--disabled');
-
   var mainPin = document.querySelector('.map__pin--main');
+
   var adFormFields = document.querySelectorAll('fieldset');
   var mainPinAddress = window.adForm.querySelector('#address');
+  var adFormSubmit = window.adForm.querySelector('.ad-form__submit');
 
   var xMin = 0;
 
@@ -21,9 +21,9 @@
 
   // блокировка элементов формы ввода
   var disableFormElements = function () {
-    for (var i = 0; i < adFormFields.length; i++) {
-      adFormFields[i].setAttribute('disabled', 'disabled');
-    }
+    adFormFields.forEach(function (field) {
+      field.setAttribute('disabled', 'disabled');
+    });
 
     // значение в поле Адреса
     mainPinAddress.value = mainPin.offsetLeft + mainPin.offsetWidth / 2;
@@ -38,22 +38,24 @@
     }
     isActive = true;
 
-    for (var i = 0; i < adFormFields.length; i++) {
-      adFormFields[i].removeAttribute('disabled');
-    }
+    adFormFields.forEach(function (field) {
+      field.removeAttribute('disabled');
+    });
 
     window.adForm.classList.remove('ad-form--disabled');
     adMap.classList.remove('map--faded');
-
     updatePins();
   };
 
   var updatePins = function () {
-    var sameHousingType = selectedHouseType !== 'any'
-      ? pins.filter(function (data) {
+    var sameHousingType = pins;
+
+    if (selectedHouseType !== 'any') {
+      sameHousingType = pins.filter(function (data) {
         return data.offer.type === selectedHouseType;
-      })
-      : pins;
+      });
+    }
+
     window.render.pins(sameHousingType);
     window.render.adCard(sameHousingType);
   };
@@ -144,6 +146,33 @@
 
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
+  });
+
+  // отправка данных
+  var onSuccess = function () {
+    clearForm();
+    clearMap();
+    window.render.success();
+    isActive = false;
+  };
+
+  var clearForm = function () {
+    disableFormElements();
+    window.adForm.classList.add('ad-form--disabled');
+    window.adForm.reset();
+  };
+
+  var clearMap = function () {
+    adMap.classList.add('map--faded');
+    window.util.clearPins();
+
+    mainPin.style.top = 375 + 'px';
+    mainPin.style.left = 570 + 'px';
+  };
+
+  window.adForm.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+    window.backend.save(new FormData(window.adForm), onSuccess, onError);
   });
 })();
 

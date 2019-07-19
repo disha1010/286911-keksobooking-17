@@ -37,7 +37,11 @@
 
       <!-- Фильтрация объявлений -->
       <div class="map__filters-container">
-        <form action="#" class="map__filters" autocomplete="off">
+        <form class="map__filters"
+              method="post"
+              enctype="multipart/form-data"
+              action="https://js.dump.academy/keksobooking"
+              autocomplete="off">
           <select name="housing-type" id="housing-type" class="map__filter">
             <option value="any" selected>Любой тип жилья</option>
             <option value="palace">Дворец</option>

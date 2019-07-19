@@ -18,14 +18,14 @@
       palace: 10000
     };
 
-    for (var i = 0; i < housingTypeOptions.length; i++) {
-      var selectedTypeOption = housingTypeOptions[i].selected;
-      var typeOptionValue = housingPrices[housingTypeOptions[i].value];
+    housingTypeOptions.forEach(function (typeOption) {
+      var selectedTypeOption = typeOption.selected;
+      var typeOptionValue = housingPrices[typeOption.value];
       if (selectedTypeOption) {
         housingPrice.min = typeOptionValue;
         housingPrice.placeholder = typeOptionValue;
       }
-    }
+    });
   };
 
   // синхронизация времени заезда и выезда
