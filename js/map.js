@@ -5,28 +5,34 @@
   var PIN_Y_MAX = 630;
 
   var adMap = document.querySelector('.map');
-  // var adForm = document.querySelector('.ad-form--disabled');
-
   var mainPin = document.querySelector('.map__pin--main');
-  var adFormFields = document.querySelectorAll('fieldset');
+
   var mainPinAddress = window.adForm.querySelector('#address');
+  var mapFilter = document.querySelector('.map__filters');
+  var housingTypeFilter = mapFilter.querySelector('#housing-type');
+
+  var forms = document.querySelectorAll('form');
 
   var xMin = 0;
 
   var pins = [];
   var selectedHouseType = 'any';
 
-  var mapFilter = document.querySelector('.map__filters-container');
-  var housingTypeFilter = mapFilter.querySelector('#housing-type');
+  // значение в поле Адреса
+  var mainPinValue = function () {
+    mainPinAddress.value = (mainPin.offsetLeft + mainPin.offsetWidth / 2) + ', ' + (mainPin.offsetTop + mainPin.offsetHeight);
+  };
 
   // блокировка элементов формы ввода
   var disableFormElements = function () {
-    for (var i = 0; i < adFormFields.length; i++) {
-      adFormFields[i].setAttribute('disabled', 'disabled');
-    }
+    forms.forEach(function (formItem) {
+      var formElement = formItem.children;
+      [].forEach.call(formElement, function (field) {
+        field.setAttribute('disabled', 'disabled');
+      });
+    });
 
-    // значение в поле Адреса
-    mainPinAddress.value = mainPin.offsetLeft + mainPin.offsetWidth / 2;
+    mainPinValue();
   };
 
   // aктивация форм и карты
@@ -38,24 +44,17 @@
     }
     isActive = true;
 
-    for (var i = 0; i < adFormFields.length; i++) {
-      adFormFields[i].removeAttribute('disabled');
-    }
+    forms.forEach(function (formItem) {
+      var formElement = formItem.children;
+      [].forEach.call(formElement, function (field) {
+        field.removeAttribute('disabled');
+      });
+    });
 
     window.adForm.classList.remove('ad-form--disabled');
     adMap.classList.remove('map--faded');
 
     updatePins();
-  };
-
-  var updatePins = function () {
-    var sameHousingType = selectedHouseType !== 'any'
-      ? pins.filter(function (data) {
-        return data.offer.type === selectedHouseType;
-      })
-      : pins;
-    window.render.pins(sameHousingType);
-    window.render.adCard(sameHousingType);
   };
 
   var onLoad = function (data) {
@@ -69,7 +68,18 @@
     errorMessage.textContent = message;
   };
 
-  disableFormElements();
+  var updatePins = function () {
+    var sameHousingType = pins;
+
+    if (selectedHouseType !== 'any') {
+      sameHousingType = pins.filter(function (data) {
+        return data.offer.type === selectedHouseType;
+      });
+    }
+
+    window.render.pins(sameHousingType);
+    window.render.adCard(sameHousingType);
+  };
 
   housingTypeFilter.addEventListener('change', function () {
     selectedHouseType = housingTypeFilter.value;
@@ -80,6 +90,8 @@
     this.x = x;
     this.y = y;
   };
+
+  disableFormElements();
 
   // перетаскивание
   var isDrag = false;
@@ -122,8 +134,7 @@
         mainPin.style.top = newLocation.y + 'px';
       }
 
-      // значение в поле Адреса
-      mainPinAddress.value = mainPin.offsetLeft + mainPin.offsetWidth / 2;
+      mainPinValue();
     };
 
     isDrag = true;
@@ -144,6 +155,33 @@
 
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
+  });
+
+  // отправка данных
+  var onSuccess = function () {
+    clearForm();
+    clearMap();
+    window.render.success();
+    isActive = false;
+  };
+
+  var clearForm = function () {
+    disableFormElements();
+    window.adForm.classList.add('ad-form--disabled');
+    window.adForm.reset();
+  };
+
+  var clearMap = function () {
+    adMap.classList.add('map--faded');
+    window.util.clearPins();
+
+    mainPin.style.top = 375 + 'px';
+    mainPin.style.left = 570 + 'px';
+  };
+
+  window.adForm.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+    window.backend.save(new FormData(window.adForm), onSuccess, onError);
   });
 })();
 

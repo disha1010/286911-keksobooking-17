@@ -10,6 +10,7 @@
   var mapPins = document.querySelector('.map__pins');
 
   var errorTemplate = document.querySelector('#error').content.querySelector('.error');
+  var successTemplate = document.querySelector('#success').content.querySelector('.success');
   var mainWrapper = document.querySelector('main');
 
   var mapCardTemplate = document.querySelector('#card').content.querySelector('.map__card');
@@ -85,7 +86,7 @@
 
   var closeOfferCard = function () {
     var offerCard = document.querySelector('.map__card');
-    offerCard.classList.add('hidden');
+    window.util.hideElement(offerCard);
   };
 
   var openPopup = function (cardTemplate, data) {
@@ -109,20 +110,18 @@
   window.render = {
     pins: function (data) {
       // remove existing pins
-      var oldPins = mapPins.querySelectorAll('.map__pin--ads');
-      if (oldPins && oldPins.length) {
-        oldPins.forEach(function (p) {
-          p.parentElement.removeChild(p);
-        });
-      }
+      window.util.clearPins();
 
       // add new pins
       var mapFragment = document.createDocumentFragment();
       var takeNumber = data.length > 5 ? 5 : data.length;
 
-      for (var i = 0; i < takeNumber; i++) {
-        mapFragment.appendChild(createMapElement(data[i], i));
-      }
+      data.forEach(function (item, index) {
+        if (index > takeNumber - 1) {
+          return;
+        }
+        mapFragment.appendChild(createMapElement(item, index));
+      });
 
       mapPins.appendChild(mapFragment);
     },
@@ -132,6 +131,17 @@
 
       errorFragment.appendChild(error);
       mainWrapper.appendChild(errorFragment);
+
+      window.util.makeHideable(error);
+    },
+    success: function () {
+      var success = successTemplate.cloneNode(true);
+      var successFragment = document.createDocumentFragment();
+
+      successFragment.appendChild(success);
+      mainWrapper.appendChild(successFragment);
+
+      window.util.makeHideable(success);
     },
     adCard: function (data) {
       var mapCardFragment = document.createDocumentFragment();

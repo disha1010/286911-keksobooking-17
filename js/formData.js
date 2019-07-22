@@ -11,21 +11,21 @@
 
   // нахождение минимальной цены за ночь
   var getMinPriceByHousingType = function () {
-    var housingPrices = {
-      bungalo: 0,
-      flat: 1000,
-      house: 5000,
-      palace: 10000
+    var HousingPrices = {
+      BUNGALO: 0,
+      FLAT: 1000,
+      HOUSE: 5000,
+      PALACE: 10000
     };
 
-    for (var i = 0; i < housingTypeOptions.length; i++) {
-      var selectedTypeOption = housingTypeOptions[i].selected;
-      var typeOptionValue = housingPrices[housingTypeOptions[i].value];
+    housingTypeOptions.forEach(function (typeOption) {
+      var selectedTypeOption = typeOption.selected;
+      var typeOptionValue = HousingPrices[typeOption.value.toUpperCase()];
       if (selectedTypeOption) {
         housingPrice.min = typeOptionValue;
         housingPrice.placeholder = typeOptionValue;
       }
-    }
+    });
   };
 
   // синхронизация времени заезда и выезда
@@ -46,17 +46,17 @@
   // add capacity option by rooms
   roomNumber.addEventListener('change', function (evt) {
     evt.preventDefault();
-    var room = +roomNumber.value;
+    var roomCount = +roomNumber.value;
     var capacityOption;
     capacity.innerHTML = '';
 
-    if (room === 100) {
+    if (roomCount === 100) {
       capacityOption = document.createElement('option');
       capacity.value = 0;
       capacityOption.innerHTML = 'не для гостей';
       capacity.add(capacityOption);
     } else {
-      for (var i = 0; i < room; i++) {
+      for (var i = 0; i < roomCount; i++) {
         capacityOption = document.createElement('option');
         capacity.value = i + 1;
         if ((i + 1) === 1) {
