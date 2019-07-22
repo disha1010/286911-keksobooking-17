@@ -53,6 +53,7 @@
 
     window.adForm.classList.remove('ad-form--disabled');
     adMap.classList.remove('map--faded');
+
     updatePins();
   };
 
