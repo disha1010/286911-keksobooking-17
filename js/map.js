@@ -15,12 +15,13 @@
 
   var xMin = 0;
 
-  var pins = [];
-  var selectedHouseType = 'any';
-
   // значение в поле Адреса
   var mainPinValue = function () {
-    mainPinAddress.value = (mainPin.offsetLeft + mainPin.offsetWidth / 2) + ', ' + (mainPin.offsetTop + mainPin.offsetHeight);
+    mainPinAddress.value =
+      mainPin.offsetLeft +
+      mainPin.offsetWidth / 2 +
+      ', ' +
+      (mainPin.offsetTop + mainPin.offsetHeight);
   };
 
   // блокировка элементов формы ввода
@@ -54,12 +55,7 @@
     window.adForm.classList.remove('ad-form--disabled');
     adMap.classList.remove('map--faded');
 
-    updatePins();
-  };
-
-  var onLoad = function (data) {
-    pins = data;
-    updatePins();
+    onActualizePins();
   };
 
   var onError = function (message) {
@@ -68,23 +64,18 @@
     errorMessage.textContent = message;
   };
 
-  var updatePins = function () {
-    var sameHousingType = pins;
-
-    if (selectedHouseType !== 'any') {
-      sameHousingType = pins.filter(function (data) {
-        return data.offer.type === selectedHouseType;
-      });
-    }
-
-    window.render.pins(sameHousingType);
-    window.render.adCard(sameHousingType);
+  var setMapPins = function (items) {
+    window.render.pins(items);
+    window.render.adCard(items);
   };
+  function onActualizePins() {
+  // lock filters
+  // run async dataloading with filter
+  // pass ondataready func
+    window.adsApi.getFilteredAds(setMapPins, onError);
+  }
 
-  housingTypeFilter.addEventListener('change', function () {
-    selectedHouseType = housingTypeFilter.value;
-    updatePins();
-  });
+  housingTypeFilter.addEventListener('change', onActualizePins);
 
   var Coordinate = function (x, y) {
     this.x = x;
@@ -99,7 +90,7 @@
     evt.preventDefault();
 
     activateElements();
-    window.backend.load(onLoad, onError);
+    onActualizePins();
 
     var limits = {
       left: xMin,
@@ -111,12 +102,21 @@
     var startCoords = new Coordinate(evt.clientX, evt.clientY + window.scrollY);
 
     var setMainPinCoords = function (pinMoveEvt) {
-      var newMouseCoords = new Coordinate(pinMoveEvt.clientX, pinMoveEvt.clientY + window.scrollY);
-      var shift = new Coordinate(startCoords.x - newMouseCoords.x, startCoords.y - newMouseCoords.y);
+      var newMouseCoords = new Coordinate(
+          pinMoveEvt.clientX,
+          pinMoveEvt.clientY + window.scrollY
+      );
+      var shift = new Coordinate(
+          startCoords.x - newMouseCoords.x,
+          startCoords.y - newMouseCoords.y
+      );
 
       startCoords = newMouseCoords;
 
-      var newLocation = new Coordinate(mainPin.offsetLeft - shift.x, mainPin.offsetTop - shift.y);
+      var newLocation = new Coordinate(
+          mainPin.offsetLeft - shift.x,
+          mainPin.offsetTop - shift.y
+      );
 
       if (isDrag) {
         if (newMouseCoords.x - adMap.offsetLeft > limits.right) {
@@ -184,4 +184,3 @@
     window.backend.save(new FormData(window.adForm), onSuccess, onError);
   });
 })();
-
