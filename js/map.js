@@ -9,7 +9,22 @@
 
   var mainPinAddress = window.adForm.querySelector('#address');
   var mapFilter = document.querySelector('.map__filters');
-  var housingTypeFilter = mapFilter.querySelector('#housing-type');
+  window.filters = {
+    type: mapFilter.querySelector('#housing-type'),
+    price: mapFilter.querySelector('#housing-price'),
+    rooms: mapFilter.querySelector('#housing-rooms'),
+    guests: mapFilter.querySelector('#housing-guests'),
+    features: Array.from(mapFilter.querySelectorAll('input[name="features"]'), function (item) {
+      return item;
+    })
+  };
+  window.filters.type.addEventListener('change', onActualizePins);
+  window.filters.price.addEventListener('change', onActualizePins);
+  window.filters.rooms.addEventListener('change', onActualizePins);
+  window.filters.guests.addEventListener('change', onActualizePins);
+  window.filters.features.forEach(function (el) {
+    el.addEventListener('change', onActualizePins);
+  });
 
   var forms = document.querySelectorAll('form');
 
@@ -74,8 +89,6 @@
   // pass ondataready func
     window.adsApi.getFilteredAds(setMapPins, onError);
   }
-
-  housingTypeFilter.addEventListener('change', onActualizePins);
 
   var Coordinate = function (x, y) {
     this.x = x;

@@ -2,23 +2,15 @@
 
 (function () {
   var onLoad;
-  var mapFilter = document.querySelector('.map__filters');
-  var houseType = mapFilter.querySelector('#housing-type');
-  var housePrice = mapFilter.querySelector('#housing-price');
-  var houseRooms = mapFilter.querySelector('#housing-rooms');
-  var houseGuests = mapFilter.querySelector('#housing-guests');
-  var houseFeatures = Array.from(mapFilter.querySelectorAll('input[name="features"]'), function (item) {
-    return item;
-  });
 
   window.adsApi = {
     getFilters: function () {
       var filters = {
-        type: houseType.value,
-        price: housePrice.value,
-        rooms: houseRooms.value,
-        guests: houseGuests.value,
-        features: houseFeatures
+        type: window.filters.type.value,
+        price: window.filters.price.value,
+        rooms: window.filters.rooms.value,
+        guests: window.filters.guests.value,
+        features: window.filters.features
           .filter(function (e) {
             return e.checked;
           })
@@ -39,24 +31,38 @@
         });
       }
       if (filter.guests !== 'any') {
-      //   result = result.filter(function (ad) {
-      //     return ad.offer.guests >= filter.guests;
-      //   });
+        result = result.filter(function (ad) {
+          switch (filter.guests) {
+            case '2': return ad.offer.guests === 2;
+            case '1': return ad.offer.guests === 1;
+            case '0': return ad.offer.guests >= 100 || ad.offer.guests === 0;
+            default: return false;
+          }
+        });
       }
       if (filter.price !== 'any') {
-      //   result = result.filter(function (ad) {
-      //     return ad.offer.price === filter.price;
-      //   });
+        result = result.filter(function (ad) {
+          switch (filter.price) {
+            case 'low': return ad.offer.price <= 10000;
+            case 'middle': return ad.offer.price >= 10000 && ad.offer.price <= 50000;
+            case 'high': return ad.offer.price >= 50000;
+            default: return false;
+          }
+        });
       }
       if (filter.rooms !== 'any') {
-      //   result = result.filter(function (ad) {
-      //     return ad.offer.rooms === filter.rooms;
-      //   });
+        result = result.filter(function (ad) {
+          return ad.offer.rooms === +filter.rooms;
+        });
       }
       if (filter.features.length) {
-      //   result = result.filter(function (ad) {
-      //     return ad.offer.features === filter.features;
-      //   });
+        result = result.filter(function (ad) {
+          var all = true;
+          filter.features.forEach(function (f) {
+            all = all & (ad.offer.features.indexOf(f) >= 0);
+          });
+          return all;
+        });
       }
 
       onLoad(result);
