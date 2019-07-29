@@ -51,6 +51,16 @@
     mainPinValue();
   };
 
+  var activateFormElements = function () {
+    forms.forEach(function (formItem) {
+      var formElement = formItem.children;
+      [].forEach.call(formElement, function (field) {
+        field.removeAttribute('disabled');
+      });
+    });
+    window.adForm.classList.remove('ad-form--disabled');
+  };
+
   // aктивация форм и карты
   var isActive = false;
 
@@ -60,14 +70,8 @@
     }
     isActive = true;
 
-    forms.forEach(function (formItem) {
-      var formElement = formItem.children;
-      [].forEach.call(formElement, function (field) {
-        field.removeAttribute('disabled');
-      });
-    });
+    activateFormElements();
 
-    window.adForm.classList.remove('ad-form--disabled');
     adMap.classList.remove('map--faded');
 
     onActualizePins();
@@ -82,11 +86,10 @@
   var setMapPins = function (items) {
     window.render.pins(items);
     window.render.adCard(items);
+    activateFormElements();
   };
   function onActualizePins() {
-  // lock filters
-  // run async dataloading with filter
-  // pass ondataready func
+    disableFormElements();
     window.adsApi.getFilteredAds(setMapPins, onError);
   }
 
