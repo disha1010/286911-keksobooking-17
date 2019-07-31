@@ -150,7 +150,7 @@
     adCard: function (data) {
       var mapCardFragment = document.createDocumentFragment();
       var pins = mapPins.querySelectorAll('.map__pin--ads');
-      
+
       removeAdCard();
 
       pins.forEach(function (pin) {

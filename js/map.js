@@ -77,15 +77,14 @@
 
   var onActualizePins = function () {
     if (actualizeTimeout) {
-    window.clearTimeout(actualizeTimeout); 
-    actualizeTimeout = null;
+      window.clearTimeout(actualizeTimeout);
+      actualizeTimeout = null;
     }
     actualizeTimeout = window.setTimeout(function () {
       disableFormElements();
       window.adsApi.getFilteredAds(setMapPins, onError);
     }, 500);
   };
-  
 
   var Coordinate = function (x, y) {
     this.x = x;
@@ -193,7 +192,7 @@
     evt.preventDefault();
     window.backend.save(new FormData(window.adForm), onSuccess, onError);
   });
-  
+
   window.filters = {
     type: mapFilter.querySelector('#housing-type'),
     price: mapFilter.querySelector('#housing-price'),
