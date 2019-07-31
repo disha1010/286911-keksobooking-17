@@ -76,6 +76,7 @@
   var actualizeTimeout = null;
 
   var onActualizePins = function () {
+    // debounce
     if (actualizeTimeout) {
       window.clearTimeout(actualizeTimeout);
       actualizeTimeout = null;
