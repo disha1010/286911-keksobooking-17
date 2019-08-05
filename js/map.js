@@ -13,6 +13,9 @@
   var forms = document.querySelectorAll('form');
   var resetButton = document.querySelector('.ad-form__reset');
 
+  var avatarPreview = document.querySelector('.ad-form-header__preview img');
+  var adPreview = document.querySelector('.ad-form__photo');
+
   var xMin = 0;
 
   // значение в поле Адреса
@@ -185,6 +188,10 @@
     disableFormElements();
     window.adForm.classList.add('ad-form--disabled');
     window.adForm.reset();
+
+    // удаление картинок и аватарки в форме
+    avatarPreview.src = 'img/muffin-grey.svg';
+    adPreview.innerHTML = '';
   };
 
   var clearMap = function () {
