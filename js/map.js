@@ -9,19 +9,19 @@
 
   var mainPinAddress = window.adForm.querySelector('#address');
   var mapFilter = document.querySelector('.map__filters');
-  var housingTypeFilter = mapFilter.querySelector('#housing-type');
 
   var forms = document.querySelectorAll('form');
   var resetButton = document.querySelector('.ad-form__reset');
 
   var xMin = 0;
 
-  var pins = [];
-  var selectedHouseType = 'any';
-
   // значение в поле Адреса
   var mainPinValue = function () {
-    mainPinAddress.value = (mainPin.offsetLeft + mainPin.offsetWidth / 2) + ', ' + (mainPin.offsetTop + mainPin.offsetHeight);
+    mainPinAddress.value =
+      mainPin.offsetLeft +
+      mainPin.offsetWidth / 2 +
+      ', ' +
+      (mainPin.offsetTop + mainPin.offsetHeight);
   };
 
   // блокировка элементов формы ввода
@@ -41,6 +41,16 @@
     mainPin.style.left = 570 + 'px';
   };
 
+  var activateFormElements = function () {
+    forms.forEach(function (formItem) {
+      var formElement = formItem.children;
+      [].forEach.call(formElement, function (field) {
+        field.removeAttribute('disabled');
+      });
+    });
+    window.adForm.classList.remove('ad-form--disabled');
+  };
+
   // aктивация форм и карты
   var isActive = false;
 
@@ -50,22 +60,11 @@
     }
     isActive = true;
 
-    forms.forEach(function (formItem) {
-      var formElement = formItem.children;
-      [].forEach.call(formElement, function (field) {
-        field.removeAttribute('disabled');
-      });
-    });
+    activateFormElements();
 
-    window.adForm.classList.remove('ad-form--disabled');
     adMap.classList.remove('map--faded');
 
-    updatePins();
-  };
-
-  var onLoad = function (data) {
-    pins = data;
-    updatePins();
+    onActualizePins();
   };
 
   var onError = function (message) {
@@ -74,23 +73,25 @@
     errorMessage.textContent = message;
   };
 
-  var updatePins = function () {
-    var sameHousingType = pins;
-
-    if (selectedHouseType !== 'any') {
-      sameHousingType = pins.filter(function (data) {
-        return data.offer.type === selectedHouseType;
-      });
-    }
-
-    window.render.pins(sameHousingType);
-    window.render.adCard(sameHousingType);
+  var setMapPins = function (items) {
+    window.render.pins(items);
+    window.render.adCard(items);
+    activateFormElements();
   };
 
-  housingTypeFilter.addEventListener('change', function () {
-    selectedHouseType = housingTypeFilter.value;
-    updatePins();
-  });
+  var actualizeTimeout = null;
+
+  var onActualizePins = function () {
+    // debounce
+    if (actualizeTimeout) {
+      window.clearTimeout(actualizeTimeout);
+      actualizeTimeout = null;
+    }
+    actualizeTimeout = window.setTimeout(function () {
+      disableFormElements();
+      window.adsApi.getFilteredAds(setMapPins, onError);
+    }, 500);
+  };
 
   var Coordinate = function (x, y) {
     this.x = x;
@@ -105,7 +106,7 @@
     evt.preventDefault();
 
     activateElements();
-    window.backend.load(onLoad, onError);
+    onActualizePins();
 
     var limits = {
       left: xMin,
@@ -117,12 +118,21 @@
     var startCoords = new Coordinate(evt.clientX, evt.clientY + window.scrollY);
 
     var setMainPinCoords = function (pinMoveEvt) {
-      var newMouseCoords = new Coordinate(pinMoveEvt.clientX, pinMoveEvt.clientY + window.scrollY);
-      var shift = new Coordinate(startCoords.x - newMouseCoords.x, startCoords.y - newMouseCoords.y);
+      var newMouseCoords = new Coordinate(
+          pinMoveEvt.clientX,
+          pinMoveEvt.clientY + window.scrollY
+      );
+      var shift = new Coordinate(
+          startCoords.x - newMouseCoords.x,
+          startCoords.y - newMouseCoords.y
+      );
 
       startCoords = newMouseCoords;
 
-      var newLocation = new Coordinate(mainPin.offsetLeft - shift.x, mainPin.offsetTop - shift.y);
+      var newLocation = new Coordinate(
+          mainPin.offsetLeft - shift.x,
+          mainPin.offsetTop - shift.y
+      );
 
       if (isDrag) {
         if (newMouseCoords.x - adMap.offsetLeft > limits.right) {
@@ -196,5 +206,21 @@
     clearMap();
     isActive = false;
   });
-})();
 
+  window.filters = {
+    type: mapFilter.querySelector('#housing-type'),
+    price: mapFilter.querySelector('#housing-price'),
+    rooms: mapFilter.querySelector('#housing-rooms'),
+    guests: mapFilter.querySelector('#housing-guests'),
+    features: Array.from(mapFilter.querySelectorAll('input[name="features"]'), function (item) {
+      return item;
+    })
+  };
+  window.filters.type.addEventListener('change', onActualizePins);
+  window.filters.price.addEventListener('change', onActualizePins);
+  window.filters.rooms.addEventListener('change', onActualizePins);
+  window.filters.guests.addEventListener('change', onActualizePins);
+  window.filters.features.forEach(function (el) {
+    el.addEventListener('change', onActualizePins);
+  });
+})();

@@ -61,7 +61,7 @@
     offerType.innerHTML = housingType[offerData.offer.type];
     offerRoomsAndGuests.innerHTML = offerData.offer.rooms + ' комнаты для ' + offerData.offer.rooms + ' гостей';
     offerTime.innerHTML = 'Заезд после ' + offerData.offer.checkin + ', выезд до ' + offerData.offer.checkout;
-    offerFeatures.innerHTML = offerData.offer.features;
+    offerFeatures.innerHTML = offerData.offer.features.join(', ');
     offerDescription.innerHTML = offerData.offer.description;
     offerAvatar.src = offerData.author.avatar;
 
@@ -89,15 +89,19 @@
     window.util.hideElement(offerCard);
   };
 
-  var openPopup = function (cardTemplate, data) {
-    var offerCard = cardTemplate.appendChild(getAdOffer(data));
-    var offerClose = offerCard.querySelector('.popup__close');
-
+  var removeAdCard = function () {
     var offerCardNew = document.querySelector('.map__card');
 
     if (offerCardNew) {
       offerCardNew.parentNode.removeChild(offerCardNew);
     }
+  };
+
+  var openPopup = function (cardTemplate, data) {
+    var offerCard = cardTemplate.appendChild(getAdOffer(data));
+    var offerClose = offerCard.querySelector('.popup__close');
+
+    removeAdCard();
 
     adMap.appendChild(offerCard, mapFilterContainer);
     document.addEventListener('keydown', onEscPress);
@@ -146,6 +150,8 @@
     adCard: function (data) {
       var mapCardFragment = document.createDocumentFragment();
       var pins = mapPins.querySelectorAll('.map__pin--ads');
+
+      removeAdCard();
 
       pins.forEach(function (pin) {
         pin.addEventListener('click', function () {
