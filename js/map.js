@@ -12,6 +12,7 @@
   var housingTypeFilter = mapFilter.querySelector('#housing-type');
 
   var forms = document.querySelectorAll('form');
+  var resetButton = document.querySelector('.ad-form__reset');
 
   var xMin = 0;
 
@@ -33,6 +34,11 @@
     });
 
     mainPinValue();
+  };
+
+  var resetMainPin = function () {
+    mainPin.style.top = 375 + 'px';
+    mainPin.style.left = 570 + 'px';
   };
 
   // aктивация форм и карты
@@ -175,13 +181,20 @@
     adMap.classList.add('map--faded');
     window.util.clearPins();
 
-    mainPin.style.top = 375 + 'px';
-    mainPin.style.left = 570 + 'px';
+    resetMainPin();
+    mainPinValue();
   };
 
   window.adForm.addEventListener('submit', function (evt) {
     evt.preventDefault();
     window.backend.save(new FormData(window.adForm), onSuccess, onError);
+  });
+
+  resetButton.addEventListener('click', function (evt) {
+    evt.preventDefault();
+    clearForm();
+    clearMap();
+    isActive = false;
   });
 })();
 
